@@ -1,10 +1,28 @@
+const HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <title>My Telegram Login</title>
+</head>
+<body>
+  <h1>Login with Telegram</h1>
+  <script async src="https://telegram.org/js/telegram-widget.js?22"
+    data-telegram-login="Ailrnbot"
+    data-size="large"
+    data-auth-url="https://telegram-login.aderaw162.workers.dev"
+    data-request-access="write">
+  </script>
+</body>
+</html>`;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const params = url.searchParams;
 
     if (!params.has('hash')) {
-      return new Response('Missing hash', { status: 400 });
+      return new Response(HTML, {
+        headers: { 'content-type': 'text/html' }
+      });
     }
 
     let checkString = '';
