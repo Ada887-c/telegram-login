@@ -1,6 +1,42 @@
 const HTML = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My Telegram Login</title></head><body><h1>Login with Telegram</h1><script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="Ailrnbot" data-size="large" data-auth-url="https://telegram-login.aderaw162.workers.dev" data-request-access="write"></script></body></html>';
 
-const ADMIN_PAGE = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Admin</title></head><body style="font-family:Arial;padding:20px;max-width:600px;margin:auto"><h1>Admin Panel</h1><p id="count">Loading...</p><textarea id="msg" placeholder="Type your message..." style="width:100%;height:120px;padding:8px;font-size:14px"></textarea><br><br><button onclick="send()" style="padding:10px 20px;font-size:16px;background:#0088cc;color:white;border:none;border-radius:5px;cursor:pointer">Send to All Users</button><p id="status"></p><script>async function loadCount(){var p=new URLSearchParams(location.search).get("p")||"";var r=await fetch("/admin/users",{headers:{"x-admin":p}});var d=await r.json();document.getElementById("count").textContent="Total users: "+(d.count||0);}async function send(){var p=new URLSearchParams(location.search).get("p")||"";var m=document.getElementById("msg").value;if(!m.trim())return alert("Type a message first");document.getElementById("status").textContent="Sending...";var r=await fetch("/admin/send",{method:"POST",headers:{"content-type":"application/json","x-admin":p},body:JSON.stringify({message:m})});var d=await r.json();document.getElementById("status").textContent="Sent: "+(d.sent||0)+" / "+(d.total||0);}loadCount();</script></body></html>';
+const ADMIN_PAGE = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Admin</title></head><body style="font-family:Arial;padding:20px;max-width:600px;margin:auto">
+<h1>Admin Panel</h1>
+<div id="login">
+  <p>Enter admin password:</p>
+  <input id="pw" type="password" style="padding:8px;font-size:14px;width:60%">
+  <button onclick="login()" style="padding:8px 16px;font-size:14px">Login</button>
+</div>
+<div id="panel" style="display:none">
+  <p id="count">Loading...</p>
+  <textarea id="msg" placeholder="Type your message..." style="width:100%;height:120px;padding:8px;font-size:14px"></textarea><br><br>
+  <button onclick="send()" style="padding:10px 20px;font-size:16px;background:#0088cc;color:white;border:none;border-radius:5px">Send to All Users</button>
+  <p id="status"></p>
+</div>
+<script>
+var pw = '';
+function login(){
+  pw = document.getElementById('pw').value;
+  if(!pw) return alert('Enter password');
+  document.getElementById('login').style.display='none';
+  document.getElementById('panel').style.display='block';
+  loadCount();
+}
+async function loadCount(){
+  var r = await fetch('/admin/users',{headers:{'x-admin':pw}});
+  if(r.status!==200){alert('Wrong password');document.getElementById('login').style.display='block';document.getElementById('panel').style.display='none';return;}
+  var d = await r.json();
+  document.getElementById('count').textContent='Total users: '+(d.count||0);
+}
+async function send(){
+  var m=document.getElementById('msg').value;
+  if(!m.trim()) return alert('Type a message first');
+  document.getElementById('status').textContent='Sending...';
+  var r=await fetch('/admin/send',{method:'POST',headers:{'content-type':'application/json','x-admin':pw},body:JSON.stringify({message:m})});
+  var d=await r.json();
+  document.getElementById('status').textContent='Sent: '+(d.sent||0)+' / '+(d.total||0);
+}
+</script></body></html>`;
 
 export default {
   async fetch(request, env) {
@@ -25,7 +61,6 @@ export default {
         return new Response("Unauthorized", { status: 401 });
       }
       const body = await request.json();
-      const message = body.message;
       const result = await env.DB.prepare("SELECT id FROM users").all();
       let sent = 0;
       for (const u of result.results) {
@@ -33,7 +68,7 @@ export default {
         const r = await fetch(apiUrl, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ chat_id: u.id, text: message })
+          body: JSON.stringify({ chat_id: u.id, text: body.message })
         });
         if (r.ok) sent++;
       }
@@ -63,14 +98,7 @@ export default {
     const id = params.get("id");
     await env.DB.prepare(
       "INSERT OR REPLACE INTO users (id, first_name, last_name, username, photo_url, auth_date) VALUES (?, ?, ?, ?, ?, ?)"
-    ).bind(
-      id,
-      params.get("first_name") || "",
-      params.get("last_name") || "",
-      params.get("username") || "",
-      params.get("photo_url") || "",
-      params.get("auth_date") || ""
-    ).run();
+    ).bind(id, params.get("first_name") || "", params.get("last_name") || "", params.get("username") || "", params.get("photo_url") || "", params.get("auth_date") || "").run();
 
     const notifyText = "🔔 New login: " + (params.get("first_name") || "") + " " + (params.get("last_name") || "") + " (@" + (params.get("username") || "none") + ") - ID: " + id;
     const notifyUrl = "https://api.telegram.org/bot" + env.BOT_TOKEN + "/sendMessage";
