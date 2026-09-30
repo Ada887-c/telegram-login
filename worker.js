@@ -43,7 +43,14 @@ export default {
     if (hash !== params.get('hash')) {
       return new Response('Invalid hash', { status: 401 });
     }
-
+console.log('LOGIN:', JSON.stringify({
+  id: params.get('id'),
+  first_name: params.get('first_name'),
+  last_name: params.get('last_name'),
+  username: params.get('username'),
+  photo_url: params.get('photo_url'),
+  auth_date: params.get('auth_date')
+}));
     const name = params.get('first_name') || 'friend';
     return new Response(`<h1>Welcome, ${name}!</h1><p>You are logged in via Telegram.</p>`, {
       headers: { 'content-type': 'text/html' }
