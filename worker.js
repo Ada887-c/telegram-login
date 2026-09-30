@@ -3,15 +3,15 @@ const HTML = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My Telegra
 const ADMIN_PAGE = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Admin</title></head><body style="font-family:Arial;padding:20px;max-width:600px;margin:auto">
 <h1>Admin Panel</h1>
 <div id="login">
-  <p>Enter admin password:</p>
-  <input id="pw" type="password" style="padding:8px;font-size:14px;width:60%">
-  <button onclick="login()" style="padding:8px 16px;font-size:14px">Login</button>
+<p>Enter admin password:</p>
+<input id="pw" type="password" style="padding:8px;font-size:14px;width:60%">
+<button onclick="login()" style="padding:8px 16px;font-size:14px">Login</button>
 </div>
 <div id="panel" style="display:none">
-  <p id="count">Loading...</p>
-  <textarea id="msg" placeholder="Type your message..." style="width:100%;height:120px;padding:8px;font-size:14px"></textarea><br><br>
-  <button onclick="send()" style="padding:10px 20px;font-size:16px;background:#0088cc;color:white;border:none;border-radius:5px">Send to All Users</button>
-  <p id="status"></p>
+<p id="count">Loading...</p>
+<textarea id="msg" placeholder="Type your message..." style="width:100%;height:120px;padding:8px;font-size:14px"></textarea><br><br>
+<button onclick="send()" style="padding:10px 20px;font-size:16px;background:#0088cc;color:white;border:none;border-radius:5px">Send to All Users</button>
+<p id="status"></p>
 </div>
 <script>
 var pw = '';
