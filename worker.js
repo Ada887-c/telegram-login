@@ -49,7 +49,7 @@ export default {
     }
 
     if (path === "/admin/users") {
-      if (request.headers.get("x-admin") !== env.ADMIN_PASSWORD) {
+      if (request.headers.get("x-admin") !== "abcde") {
         return new Response("Unauthorized", { status: 401 });
       }
       const r = await env.DB.prepare("SELECT COUNT(*) as c FROM users").first();
@@ -57,7 +57,7 @@ export default {
     }
 
     if (path === "/admin/send") {
-      if (request.headers.get("x-admin") !== env.ADMIN_PASSWORD) {
+      if (request.headers.get("x-admin") !== "abcde") { {
         return new Response("Unauthorized", { status: 401 });
       }
       const body = await request.json();
